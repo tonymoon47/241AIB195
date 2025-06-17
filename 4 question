@@ -1,0 +1,30 @@
+from openpyxl import load_workbook
+import math
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+sheet = wb['Lapa_0']
+
+# Read headers from row 3
+headers = [str(cell.value).strip().lower() if cell.value else '' for cell in sheet[3]]
+
+# Identify column indices
+try:
+    product_col = headers.index('produkts')
+    price_col = headers.index('cena')
+except ValueError as e:
+    raise Exception(f"Required column not found: {e}")
+
+prices = []
+for row in sheet.iter_rows(min_row=4, values_only=True):  # data starts at row 4
+    product = str(row[product_col]).lower() if row[product_col] else ''
+    price = row[price_col]
+
+    if 'laserjet' in product and isinstance(price, (int, float)):
+        prices.append(price)
+
+if prices:
+    average = sum(prices) / len(prices)
+    print(f"Average price (rounded down) for LaserJet products: {math.floor(average)}")
+else:
+    print("No LaserJet products found.")
