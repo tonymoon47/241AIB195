@@ -1,0 +1,55 @@
+from openpyxl import load_workbook
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+
+sheet = wb[wb.sheetnames[0]]  # First sheet only
+
+# Read headers (row 3)
+headers = [str(cell.value).strip().lower() if cell.value else '' for cell in sheet[3]]
+
+def find_col(keywords):
+    for idx, val in enumerate(headers):
+        if any(k in val for k in keywords):
+            return idx
+    raise Exception(f"Column not found for keywords: {keywords}")
+
+address_col = find_col(['adrese', 'address'])
+
+count = 0
+for row in sheet.iter_rows(min_row=4, values_only=True):  # Data from row 4 onwards
+    address = row[address_col]
+    if isinstance(address, str) and address.strip().lower().startswith('ain'):
+        count += 1
+
+print(f"Number of addresses starting with 'Ain': {count}")
+
+..., [17/06/2025 20:54]
+from openpyxl import load_workbook
+from datetime import datetime
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+
+sheet = wb['Lapa_0']  # Explicitly load Lapa_0
+
+# Read headers from row 3 (indexing starts from 1)
+headers = [str(cell.value).strip().lower() if cell.value else '' for cell in sheet[3]]
+
+# Dynamically identify column indices
+try:
+    priority_col = headers.index('prioritāte')
+    date_col = headers.index('piegādes datums')
+except ValueError as e:
+    raise Exception(f"Required column not found: {e}")
+
+count = 0
+for row in sheet.iter_rows(min_row=4, values_only=True):  # Data from row 4 onward
+    priority = row[priority_col]
+    delivery_date = row[date_col]
+
+    if str(priority).strip().lower() == 'high':
+        if isinstance(delivery_date, datetime) and delivery_date.year == 2015:
+            count += 1
+
+print(f"Number of entries with High priority and delivery in 2015: {count}")
