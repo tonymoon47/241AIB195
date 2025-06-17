@@ -1,0 +1,29 @@
+from openpyxl import load_workbook
+import math
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+sheet = wb['Lapa_0']
+
+# Extract headers from row 3 (index starts at 1)
+headers = [str(cell.value).strip().lower() if cell.value else '' for cell in sheet[3]]
+
+# Get relevant column indices
+try:
+    client_col = headers.index('klients')
+    count_col = headers.index('skaits')
+    total_col = headers.index('kopā')
+except ValueError as e:
+    raise Exception(f"Missing required column: {e}")
+
+total_sum = 0
+for row in sheet.iter_rows(min_row=4, values_only=True):
+    client = str(row[client_col]).strip().lower() if row[client_col] else ''
+    count = row[count_col]
+    total = row[total_col]
+
+    if client == 'korporatīvais' and isinstance(count, (int, float)) and 40 <= count <= 50:
+        if isinstance(total, (int, float)):
+            total_sum += total
+
+print(f"Total sum (rounded down): {math.floor(total_sum)}")
