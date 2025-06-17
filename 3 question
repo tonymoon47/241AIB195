@@ -1,0 +1,25 @@
+from openpyxl import load_workbook
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+sheet = wb['Lapa_0']
+
+# Read headers from row 3
+headers = [str(cell.value).strip().lower() if cell.value else '' for cell in sheet[3]]
+
+# Identify column indices
+try:
+    address_col = headers.index('adrese')
+    city_col = headers.index('pilsēta')
+except ValueError as e:
+    raise Exception(f"Required column not found: {e}")
+
+count = 0
+for row in sheet.iter_rows(min_row=4, values_only=True):  # Data from row 4 onward
+    address = str(row[address_col]).strip().lower() if row[address_col] else ''
+    city = str(row[city_col]).strip().lower() if row[city_col] else ''
+
+    if 'adulienas iela' in address and city in ['valmiera', 'saulkrasti']:
+        count += 1
+
+print(f"Number of records where address is 'Adulienas iela' and city is Valmiera or Saulkrasti: {count}")
