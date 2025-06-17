@@ -1,0 +1,34 @@
+from openpyxl import load_workbook
+
+filename = 'sagatave_eksamenam.xlsx'
+wb = load_workbook(filename, data_only=True)
+
+total_matches = 0
+
+for sheet_name in wb.sheetnames:
+    sheet = wb[sheet_name]
+    matches = 0
+    for i, row in enumerate(sheet.iter_rows(min_row=5, values_only=True), start=5):  # data from row 5 onwards
+        # Convert all cells in row to string (if not None) for address check, and numeric for number check
+        addresses = [str(cell).strip().lower() for cell in row if isinstance(cell, str)]
+        numbers = []
+        for cell in row:
+            # Collect numeric values safely
+            try:
+                val = float(cell)
+                numbers.append(val)
+            except (TypeError, ValueError):
+                pass
+
+        # Check if any address starts with "ain"
+        address_match = any(addr.startswith('ain') for addr in addresses)
+        # Check if any number is less than 40
+        number_match = any(num < 40 for num in numbers)
+
+        if address_match and number_match:
+            matches += 1
+
+    print(f"Sheet '{sheet_name}': Matching records = {matches}")
+    total_matches += matches
+
+print(f"\n=== TOTAL MATCHING RECORDS ACROSS ALL SHEETS: {total_matches} ===")
